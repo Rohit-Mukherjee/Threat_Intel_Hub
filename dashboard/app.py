@@ -316,15 +316,33 @@ st.markdown("""
 # Initialize database
 db = ThreatIntelDB("data/threat_intel.db")
 
-# Sidebar
+# Sidebar - Always visible
 with st.sidebar:
+    # Header with logo
     st.markdown("""
-    <div style='text-align: center; padding: 20px 0;'>
+    <div style='text-align: center; padding: 20px 0; margin-bottom: 20px;'>
         <h1 style='margin: 0; font-size: 3rem;'>🛡️</h1>
         <h2 style='margin: 10px 0; background: linear-gradient(90deg, #00d4ff, #7b2cbf); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>Threat Intel Hub</h2>
         <p style='color: #a0aec0; font-size: 0.85rem;'>Real-time Intelligence Aggregation</p>
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+
+    # Navigation shortcuts
+    st.markdown("### 🧭 Quick Navigation")
+    if st.button("📰 Latest Intel", use_container_width=True, key="nav_intel"):
+        st.session_state.active_tab = 0
+    if st.button("🎯 IOCs", use_container_width=True, key="nav_iocs"):
+        st.session_state.active_tab = 1
+    if st.button("👥 APT Intel", use_container_width=True, key="nav_apt"):
+        st.session_state.active_tab = 2
+    if st.button("👤 Threat Actors", use_container_width=True, key="nav_actors"):
+        st.session_state.active_tab = 3
+    if st.button("📊 Analytics", use_container_width=True, key="nav_analytics"):
+        st.session_state.active_tab = 4
+    if st.button("⚙️ Settings", use_container_width=True, key="nav_settings"):
+        st.session_state.active_tab = 5
 
     st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
 
@@ -372,7 +390,7 @@ with st.sidebar:
         st.metric("Threat Actors", stats.get('threat_actors', 0))
         st.metric("IOCs", stats.get('total_iocs', 0))
 
-    st.markdown("<div class='custom-divider'></div>")
+    st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
 
     # Footer in sidebar
     st.markdown("""
