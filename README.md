@@ -1,20 +1,24 @@
 # 🛡️ Threat Intelligence Hub
 
-A **free, open-source threat intelligence aggregator** with a beautiful dashboard for tracking threat actors, attack chains, and latest security advisories.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Docker](https://img.shields.io/badge/docker-ready-green.svg)](https://www.docker.com/)
 
-## Features
+A **free, open-source threat intelligence aggregator** with a beautiful cyber-security themed dashboard for tracking threat actors, IOCs, and latest security advisories.
 
-- 📰 **RSS Feed Aggregation** - Collects from 14+ top security blogs (DFIR Report, Mandiant, Microsoft, CrowdStrike, CISA, etc.)
-- 🎯 **IOC Extraction** - Auto-extracts IPs, domains, URLs, hashes, CVEs, file paths, mutexes from articles
-- 📤 **Multi-Format Export** - Export IOCs to CSV, JSON, STIX 2.1, MISP, and Sigma rules
-- 🔬 **IOC Enrichment** - Optional VirusTotal, Abuse.ch integration for reputation data
-- ⛓️ **Attack Chain Tracking** - Documents full kill chains mapped to MITRE ATT&CK
-- 👤 **Threat Actor Profiles** - Pre-loaded with major APT groups
-- 🎯 **MITRE ATT&CK Mapping** - Auto-extracts technique IDs from articles
-- 📊 **Interactive Dashboard** - Beautiful Streamlit UI with filters and analytics
-- 🔄 **Auto-refresh** - Set up cron jobs for continuous collection
+## ✨ What's New (v2.0)
 
-## Quick Start
+- 🎨 **Stunning Dark UI** - Modern cyber-security theme with gradient colors and glow effects
+- ⚙️ **Settings Panel** - Configure API keys, notifications, and collection preferences
+- 🔔 **Alerts** - Email and Slack notifications for critical threats
+- 🐳 **Docker Support** - One-command deployment with docker-compose
+- 🧪 **Unit Tests** - Comprehensive test coverage for core functions
+- 🔧 **Bug Fixes** - Fixed NULL handling, deduplication, and export issues
+- 📊 **Enhanced APT Intel** - Related IOCs, malware families, external intelligence links
+
+---
+
+## 🚀 Quick Start
 
 ### Option 1: Automated Setup (Recommended)
 
@@ -34,7 +38,16 @@ run_aggregator.bat        # Run the aggregator
 run_dashboard.bat         # Launch the dashboard
 ```
 
-### Option 2: Manual Setup
+### Option 2: Docker (Easiest!)
+
+```bash
+# Clone and run with docker-compose
+docker-compose up -d
+
+# Dashboard available at http://localhost:8501
+```
+
+### Option 3: Manual Setup
 
 ```bash
 cd threat_intel_hub
@@ -45,215 +58,198 @@ python aggregator.py
 streamlit run dashboard/app.py
 ```
 
-The dashboard will open at `http://localhost:8501`
+---
 
-### What the Aggregator Does
+## 🎯 Features
 
-When you run the aggregator, it will:
-- Create the SQLite database
-- Collect intelligence from all RSS feeds (last 7 days)
-- Extract IOCs (IPs, domains, URLs, hashes, etc.) from articles
-- Fetch CISA alerts and known exploited vulnerabilities
-- Load threat actor profiles
+### Data Collection
+- 📰 **RSS Feed Aggregation** - 15+ top security blogs (Mandiant, Microsoft, CrowdStrike, CISA, etc.)
+- 🐦 **Twitter/X Integration** - Track security researchers via Nitter RSS
+- 📧 **CISA Alerts** - Known Exploited Vulnerabilities (KEV) catalog
+- 🦠 **Malware IOCs** - ESET malware intelligence from GitHub
+- 👤 **Threat Actor Profiles** - Pre-loaded with major APT groups
 
-## Dashboard Tabs
+### IOC Processing
+- 🎯 **Auto-Extraction** - IPs, domains, URLs, hashes, CVEs, emails, file paths
+- 🔬 **Enrichment** - VirusTotal, Abuse.ch, Shodan integration (optional API keys)
+- 📤 **Multi-Format Export** - CSV, JSON, STIX 2.1, MISP, Sigma rules
+- 🔄 **Deduplication** - Automatic duplicate detection and merging
 
-### 📰 Latest Intelligence
-View all collected intelligence with severity ratings, threat actors, and MITRE techniques.
+### Dashboard
+- 🎨 **Modern Dark Theme** - Cyber-security inspired design with neon accents
+- 📊 **Real-time Analytics** - Severity distribution, timelines, top techniques
+- 🔍 **Advanced Search** - Full-text search across intelligence and IOCs
+- 👥 **APT Intelligence** - Grouped intel by threat actor with external links
+- ⚙️ **Settings UI** - Configure API keys, notifications, preferences
 
-### 🎯 IOCs
-- **Clean IOCs only** - Security vendor domains filtered out
-- **Types extracted:** IP addresses, domains, URLs, MD5/SHA1/SHA256 hashes, CVEs, file names, file paths, emails
-- Filter by type (IP, domain, URL, hash, etc.) and confidence
-- **Export buttons** for one-click download:
-  - CSV - Import into Excel, SIEM, or firewall
-  - JSON - API integration
-  - STIX 2.1 - Threat intel sharing platforms
-  - MISP - Import into MISP instances
-  - Sigma Rules - Detection rules for SIEM
-- VirusTotal enrichment (add API key)
-- Abuse.ch blocklist checking (free)
+### Alerts & Notifications
+- 📧 **Email Alerts** - SMTP integration for critical threat notifications
+- 💬 **Slack Integration** - Webhook-based alerts to Slack channels
+- 🎯 **Threshold-based** - Alert on multiple IOCs from same source
 
-### 👥 APT Intelligence (NEW!)
-- **Segregated intelligence by APT group**
-- Select any APT from dropdown to view:
-  - Full APT profile (origin, motivation, aliases, targets, tools, techniques)
-  - All intel items related to that specific APT
-  - MITRE ATT&CK techniques used
-- Automatically groups intel by extracted threat actor names
+---
 
-### ⛓️ Attack Chains
-Documented attack chains with full kill chain phases.
+## 📊 Dashboard Tabs
 
-### 👤 Threat Actors
-Pre-loaded APT profiles with tools, techniques, targets.
+| Tab | Description |
+|-----|-------------|
+| **📰 Latest Intelligence** | Real-time threat intel feed with severity ratings and MITRE techniques |
+| **🎯 IOCs** | Filterable IOC database with one-click export to security tools |
+| **👥 APT Intelligence** | Intel grouped by threat actor with malware, campaigns, techniques |
+| **👤 Threat Actors** | Expandable cards with full APT profiles and external links |
+| **📊 Analytics** | Charts for sources, severity, timelines, top techniques and actors |
+| **⚙️ Settings** | API keys, notifications, collection config, dashboard preferences |
 
-### 📊 Analytics
-Charts for sources, severity, top techniques, top actors.
+---
 
-## IOC Export Examples
+## ⚙️ Configuration
 
-### Export IOCs via CLI
+### API Keys (Optional)
+
+Configure in the **Settings** tab or edit `data/config.json`:
+
+```json
+{
+  "api_keys": {
+    "virustotal": "your-vt-api-key",
+    "shodan": "your-shodan-api-key",
+    "abusech": "",
+    "censys": ""
+  }
+}
+```
+
+Get free API keys:
+- [VirusTotal](https://www.virustotal.com/gui/join-us)
+- [Shodan](https://account.shodan.io/register)
+- [Abuse.ch](https://abuse.ch/api/)
+
+### Notifications
+
+**Slack:**
+1. Create incoming webhook in Slack
+2. Go to Settings tab → Slack Notifications
+3. Enable and paste webhook URL
+
+**Email:**
+1. Go to Settings tab → Email Notifications
+2. Configure SMTP settings
+3. Add recipient addresses
+
+---
+
+## 📤 IOC Export Examples
+
+### Export via CLI
 
 ```bash
 # Export all IOCs to CSV
 python export_iocs.py -f csv -o all_iocs
 
-# Export only high-confidence domains
+# Export high-confidence domains only
 python export_iocs.py -f csv -t domain -c High -o malicious_domains
 
 # Export to STIX 2.1 format
 python export_iocs.py -f stix -o threat_intel_stix
 
-# Export to MISP format
-python export_iocs.py -f misp -o misp_event
-
 # Generate Sigma detection rules
 python export_iocs.py -f sigma -o sigma_rules
 ```
 
-### Export from Dashboard
-1. Go to the **🎯 IOCs** tab
-2. Apply filters (type, confidence, search)
-3. Click any export button (CSV, JSON, STIX, MISP, Sigma)
-4. Download the file directly
-
 ### Import into Security Tools
 
-**Firewall/Blocklist:**
+**Firewall/SIEM Blocklist:**
 ```bash
-# Export high-confidence IPs and domains
-python export_iocs.py -f csv -t ip_address -c High -o firewall_blocklist
-python export_iocs.py -f csv -t domain -c High -o domain_blocklist
-```
-
-**SIEM (Splunk, Elastic, Sentinel):**
-```bash
-# Export STIX 2.1 format
-python export_iocs.py -f stix -o siem_intel
+python export_iocs.py -f csv -t ip_address,domain -c High -o blocklist
 ```
 
 **MISP:**
 ```bash
-# Export MISP event format
-python export_iocs.py -f misp -o misp_export
-# Import via MISP UI: Events > Import Event > From JSON
+python export_iocs.py -f misp -o misp_event
+# Import via MISP: Events > Import Event > From JSON
 ```
 
-**Sigma Rules:**
-```bash
-# Generate Sigma detection rules
-python export_iocs.py -f sigma -o sigma_ioc_rules
-# Deploy to Sigma-compatible SIEM
-```
+---
 
-## Data Sources
+## 🐳 Docker Deployment
 
-| Source | Type | Update Frequency |
-|--------|------|------------------|
-| The DFIR Report | Blog RSS | Weekly |
-| Mandiant | Blog RSS | Daily |
-| Microsoft Security | Blog RSS | Daily |
-| CrowdStrike | Blog RSS | Daily |
-| SecureList (Kaspersky) | Blog RSS | Weekly |
-| BleepingComputer | Blog RSS | Daily |
-| The Hacker News | Blog RSS | Daily |
-| DarkReading | Blog RSS | Daily |
-| CISA Alerts | Government | Real-time |
-| SentinelOne | Blog RSS | Weekly |
-| Unit42 (Palo Alto) | Blog RSS | Daily |
-| Threatpost | Blog RSS | Daily |
-| SecurityWeek | Blog RSS | Daily |
-| Malpedia | Malware API | On-demand |
-| ESET Malware IOCs | GitHub | Weekly |
-
-## Automation
-
-### Set up cron job for automatic collection:
+### Basic Usage
 
 ```bash
-# Edit crontab
-crontab -e
+# Start the dashboard
+docker-compose up -d
 
-# Add this line to run every 6 hours
-0 */6 * * * cd /path/to/threat_intel_hub && /usr/bin/python3 aggregator.py >> logs/aggregator.log 2>&1
+# View logs
+docker-compose logs -f
+
+# Stop
+docker-compose down
 ```
 
-### Windows Task Scheduler:
+### With Persistent Data
 
-```powershell
-# Create scheduled task
-$action = New-ScheduledTaskAction -Execute "python" -Argument "aggregator.py" -WorkingDirectory "C:\path\to\threat_intel_hub"
-$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Hours 6)
-Register-ScheduledTask -TaskName "ThreatIntelHub" -Action $action -Trigger $trigger
+```yaml
+# docker-compose.yml already mounts:
+# - ./data:/app/data   (database and config)
+# - ./logs:/app/logs   (log files)
 ```
 
-## Database Schema
+### Run Aggregator Separately
 
-### intel_items
-- Intelligence feed items with metadata
-- Extracted threat actors and techniques
-- Severity assessment
+```bash
+# One-time collection
+docker-compose run aggregator
 
-### attack_chains
-- Full kill chain documentation
-- MITRE ATT&CK phase mapping
-
-### threat_actors
-- APT group profiles
-- Tools, techniques, targets
-
-## Customization
-
-### Add Custom RSS Feeds
-
-Edit `collectors/__init__.py`:
-
-```python
-FEEDS = {
-    'Your Custom Source': 'https://example.com/feed.xml',
-    # ... existing feeds
-}
+# Schedule with cron (host system)
+0 */6 * * * docker-compose run --rm aggregator
 ```
 
-### Add Threat Actors
+---
 
-Edit `collectors/__init__.py`:
+## 🧪 Testing
 
-```python
-ACTORS = {
-    'Your APT Name': {
-        'aliases': ['Alias1', 'Alias2'],
-        'origin': 'Country',
-        'motivation': 'Espionage',
-        'targets': ['Sector1', 'Sector2'],
-        'tools': ['Tool1', 'Tool2'],
-        'techniques': ['T1059', 'T1566']
-    },
-}
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=. --cov-report=html
+
+# Run specific test file
+pytest tests/test_core.py -v
 ```
 
-## API Usage
+---
 
-```python
-from database import ThreatIntelDB
+## 📁 Project Structure
 
-db = ThreatIntelDB("data/threat_intel.db")
-
-# Get recent intel
-items = db.get_recent_intel(limit=50)
-
-# Get attack chains
-chains = db.get_attack_chains(limit=20)
-
-# Get threat actors
-actors = db.get_threat_actors()
-
-# Get stats
-stats = db.get_stats()
+```
+threat_intel_hub/
+├── dashboard/
+│   └── app.py              # Streamlit dashboard
+├── collectors/
+│   └── __init__.py         # RSS, Twitter, CISA collectors
+├── data/
+│   ├── threat_intel.db     # SQLite database
+│   └── config.json         # Configuration (API keys, etc.)
+├── logs/
+│   └── threat_intel.log    # Application logs
+├── tests/
+│   └── test_core.py        # Unit tests
+├── aggregator.py           # Main collection script
+├── database.py             # Database layer
+├── config_manager.py       # Configuration management
+├── notification_manager.py # Email/Slack alerts
+├── ioc_extractor.py        # IOC pattern extraction
+├── export_iocs.py          # Export utilities
+├── setup.py                # Automated setup
+├── Dockerfile              # Docker image
+└── docker-compose.yml      # Docker orchestration
 ```
 
-## Troubleshooting
+---
+
+## 🔧 Troubleshooting
 
 ### "Module not found" error
 ```bash
@@ -267,23 +263,67 @@ streamlit run dashboard/app.py --server.port 8502
 ```
 
 ### No data showing
-Run the aggregator first:
 ```bash
+# Run the aggregator first
 python aggregator.py
 ```
 
-## License
+### Database errors
+```bash
+# Clean up duplicates
+# Go to Settings → Danger Zone → Clean Up Duplicate IOCs
+```
+
+### Docker issues
+```bash
+# Rebuild containers
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+---
+
+## 🛣️ Roadmap
+
+- [ ] Geomap visualization for IP attribution
+- [ ] REST API for SIEM/SOAR integration
+- [ ] PDF report generation
+- [ ] User authentication and RBAC
+- [ ] Saved searches and custom dashboards
+- [ ] Automated scheduled collection (built-in)
+- [ ] More threat intel sources (MISP feeds, OTX)
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Areas of interest:
+- Add new RSS feeds or data sources
+- Improve IOC extraction accuracy
+- Add new export formats
+- Create new dashboard visualizations
+- Write additional unit tests
+
+---
+
+## 📄 License
 
 MIT License - Free for personal and commercial use.
 
-## Contributing
+---
 
-Feel free to:
-- Add new RSS feeds
-- Add threat actor profiles
-- Improve extraction algorithms
-- Add new dashboard visualizations
+## 🙏 Acknowledgments
+
+Data sources:
+- RSS feeds from leading security vendors
+- CISA Known Exploited Vulnerabilities
+- ESET Malware IOC Repository
+- Malpedia Malware Encyclopedia
+- MITRE ATT&CK Framework
 
 ---
 
 **Built with ❤️ for the DFIR community**
+
+[Report a Bug](https://github.com/Rohit-Mukherjee/Threat_Intel_Hub/issues) | [Request Feature](https://github.com/Rohit-Mukherjee/Threat_Intel_Hub/issues) | [View on GitHub](https://github.com/Rohit-Mukherjee/Threat_Intel_Hub)
