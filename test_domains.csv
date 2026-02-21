@@ -1,0 +1,5 @@
+value,ioc_type,confidence,source,malware_family,related_threat_actors,first_seen,tags
+java.io,domain,Medium,Mandiant,G_APT_Backdoor,UNC5221|UNC6201,2026-02-20T11:38:27.346288,Threat Intelligence
+www.virustotal.com,domain,Medium,Mandiant,G_APT_Backdoor,UNC5221|UNC6201,2026-02-20T11:38:27.332699,Threat Intelligence
+www.crowdstrike.com,domain,Medium,Mandiant,G_APT_Backdoor,UNC5221|UNC6201,2026-02-20T11:38:27.318863,Threat Intelligence
+www.dell.com,domain,Medium,Mandiant,G_APT_Backdoor,UNC5221|UNC6201,2026-02-20T11:38:27.263598,Threat Intelligence
