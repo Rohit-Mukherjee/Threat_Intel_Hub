@@ -119,6 +119,9 @@ class ThreatIntelDB:
             )
         ''')
 
+        # Run migrations for existing databases
+        self._migrate_database(cursor)
+
         # Create indexes for faster lookups
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_ioc_value ON iocs(value)')
         cursor.execute('CREATE INDEX IF NOT EXISTS idx_ioc_type ON iocs(ioc_type)')
@@ -129,6 +132,42 @@ class ThreatIntelDB:
         conn.commit()
         conn.close()
         logger.info("Database schema initialized/verified")
+
+    def _migrate_database(self, cursor):
+        """Migrate existing database to new schema."""
+        try:
+            # Check if intel_id column exists in iocs table
+            cursor.execute("PRAGMA table_info(iocs)")
+            columns = {row[1] for row in cursor.fetchall()}
+
+            if 'intel_id' not in columns:
+                logger.info("Adding intel_id column to iocs table...")
+                cursor.execute('ALTER TABLE iocs ADD COLUMN intel_id INTEGER')
+
+            # Check for new columns in intel_items
+            cursor.execute("PRAGMA table_info(intel_items)")
+            columns = {row[1] for row in cursor.fetchall()}
+
+            if 'malware_families' not in columns:
+                logger.info("Adding malware_families column to intel_items...")
+                cursor.execute("ALTER TABLE intel_items ADD COLUMN malware_families TEXT DEFAULT '[]'")
+
+            if 'campaign_name' not in columns:
+                logger.info("Adding campaign_name column to intel_items...")
+                cursor.execute("ALTER TABLE intel_items ADD COLUMN campaign_name TEXT DEFAULT ''")
+
+            # Check for new columns in iocs
+            cursor.execute("PRAGMA table_info(iocs)")
+            columns = {row[1] for row in cursor.fetchall()}
+
+            if 'abuse_ch_malware' not in columns:
+                logger.info("Adding abuse_ch_malware column to iocs...")
+                cursor.execute("ALTER TABLE iocs ADD COLUMN abuse_ch_malware TEXT DEFAULT ''")
+
+            logger.info("Database migration completed successfully")
+
+        except Exception as e:
+            logger.warning(f"Migration notice: {e}")
 
     def add_intel_item(self, title: str, source: str, url: str, summary: str = '',
                        threat_actors: List[str] = None, techniques: List[str] = None,
