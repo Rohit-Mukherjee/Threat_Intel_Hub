@@ -392,45 +392,48 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Top metrics row with custom cards
-col1, col2, col3, col4 = st.columns(4)
+# Top metrics row with custom cards - Clickable navigation
+st.markdown("### 📊 Quick Stats")
+
+col1, col2, col3 = st.columns(3)
+
+# Track which tab to navigate to
+if 'selected_tab' not in st.session_state:
+    st.session_state.selected_tab = 0
 
 with col1:
-    st.markdown(f"""
-    <div class='metric-card'>
-        <div style='font-size: 0.85rem; color: #a0aec0; margin-bottom: 8px;'>📰 Intel Items</div>
-        <div style='font-size: 2.5rem; font-weight: 700; color: #00d4ff;'>{stats.get('intel_items', 0):,}</div>
-        <div style='font-size: 0.75rem; color: #00ff88; margin-top: 8px;'>▲ Total collected</div>
-    </div>
-    """, unsafe_allow_html=True)
+    if st.button(
+        f"📰 Intel Items\n{stats.get('intel_items', 0):,}",
+        use_container_width=True,
+        key="btn_intel",
+        help="View latest intelligence feeds"
+    ):
+        st.session_state.selected_tab = 0
+        st.rerun()
+    st.caption("▲ Total collected")
 
 with col2:
-    st.markdown(f"""
-    <div class='metric-card'>
-        <div style='font-size: 0.85rem; color: #a0aec0; margin-bottom: 8px;'>⛓️ Attack Chains</div>
-        <div style='font-size: 2.5rem; font-weight: 700; color: #7b2cbf;'>{stats.get('attack_chains', 0)}</div>
-        <div style='font-size: 0.75rem; color: #c77dff; margin-top: 8px;'>◆ Documented</div>
-    </div>
-    """, unsafe_allow_html=True)
+    if st.button(
+        f"👤 Threat Actors\n{stats.get('threat_actors', 0)}",
+        use_container_width=True,
+        key="btn_actors",
+        help="View tracked threat actors"
+    ):
+        st.session_state.selected_tab = 3
+        st.rerun()
+    st.caption("◆ Tracked groups")
 
 with col3:
-    st.markdown(f"""
-    <div class='metric-card'>
-        <div style='font-size: 0.85rem; color: #a0aec0; margin-bottom: 8px;'>👤 Threat Actors</div>
-        <div style='font-size: 2.5rem; font-weight: 700; color: #ff006e;'>{stats.get('threat_actors', 0)}</div>
-        <div style='font-size: 0.75rem; color: #ff80ab; margin-top: 8px;'>◆ Tracked</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col4:
     critical_count = len([i for i in db.get_recent_intel(100) if i.get('severity') == 'Critical'])
-    st.markdown(f"""
-    <div class='metric-card'>
-        <div style='font-size: 0.85rem; color: #a0aec0; margin-bottom: 8px;'>🔴 Critical Alerts</div>
-        <div style='font-size: 2.5rem; font-weight: 700; color: #ff0040;'>{critical_count}</div>
-        <div style='font-size: 0.75rem; color: #ff6b6b; margin-top: 8px;'>⚠ Recent</div>
-    </div>
-    """, unsafe_allow_html=True)
+    if st.button(
+        f"🔴 Critical Alerts\n{critical_count}",
+        use_container_width=True,
+        key="btn_critical",
+        help="View critical severity alerts"
+    ):
+        st.session_state.selected_tab = 0
+        st.rerun()
+    st.caption("⚠ Recent critical")
 
 st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
 
@@ -442,6 +445,16 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "👤 Threat Actors",
     "📊 Analytics"
 ])
+
+# Auto-switch tabs based on button clicks
+if st.session_state.selected_tab == 1:
+    tab2.select()
+elif st.session_state.selected_tab == 2:
+    tab3.select()
+elif st.session_state.selected_tab == 3:
+    tab4.select()
+elif st.session_state.selected_tab == 4:
+    tab5.select()
 
 # Tab 1: Latest Intelligence
 with tab1:
