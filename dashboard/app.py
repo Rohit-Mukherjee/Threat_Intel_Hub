@@ -991,9 +991,14 @@ with tab3:
             for item in apt_items[:20]:
                 severity = item.get('severity', 'Low')
                 sev_icon = {"Critical": "🔴", "High": "🟠", "Medium": "🟡", "Low": "🟢"}.get(severity, "⚪")
+                title = item.get('title', 'Unknown')
+                url = item.get('url', '#')
+                
                 st.markdown(f"""
                 <div class='intel-card'>
-                    <h4 style='margin: 0 0 8px 0;'>{sev_icon} [{item.get('title', 'Unknown')}]({item.get('url', '#')})</h4>
+                    <h4 style='margin: 0 0 8px 0;'>
+                        {sev_icon} <a href='{url}' target='_blank' style='color: #00d4ff; text-decoration: none; font-weight: 600;'>{title}</a>
+                    </h4>
                     <div style='color: #a0aec0; font-size: 0.85rem;'>
                         📍 {item.get('source', 'Unknown')} | 📅 {item.get('published_at', '')[:10] if item.get('published_at') else 'Unknown'}
                     </div>
