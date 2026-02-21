@@ -217,21 +217,74 @@ class IOCExtractor:
             if regex.match(url):
                 return True
         
-        # Check for common benign patterns
+        # Check for common benign patterns - BE MORE AGGRESSIVE
         benign_indicators = [
+            # Feed/RSS
             '/feed', '/rss', '/rss.xml', '/feed.xml',
             'feedburner', 'feeds.feedburner.com',
+            
+            # Social media
             'twitter.com/', 'linkedin.com/', 'facebook.com/',
             'youtube.com/', 'google.com/', 'github.com/',
+            'reddit.com/', 'medium.com/', 'substack.com',
+            
+            # Tech companies
             'microsoft.com/', 'windows.com/', 'office.com/',
-            'amazon.com/', 'aws.amazon.com/',
+            'amazon.com/', 'aws.amazon.com/', 'apple.com/',
+            
+            # CDN/static/assets
             'cdn.', 'static.', 'assets.', 'media.',
+            'cloudflare.', 'akamai.', 'fastly.',
+            
+            # Documentation
             'docs.', 'support.', 'learn.', 'help.',
+            'developer.', 'blog.', 'news.', 'article.',
+            
+            # File types that are typically not IOCs
+            '.html', '.php', '.aspx', '.jsp',
+            
+            # Common benign paths
+            '/category/', '/tag/', '/author/', '/page/',
+            '/wp-content/', '/wp-includes/',
+            
+            # Search/analytics
+            'googleusercontent', 'googlevideo', 'gstatic',
+            'ytimg.com', 'fbcdn.net', 'twimg.com',
+            
+            # Standards/research
+            'w3.org', 'mozilla.org', 'apache.org',
+            'wikipedia.org', 'stackoverflow.com',
+            
+            # Government/education
+            '.gov/', '.edu/', '.mil/',
+            'cisa.gov', 'fbi.gov', 'nsa.gov',
+            
+            # Security vendors (should never be IOCs)
+            'virustotal.com', 'mandiant.com', 'crowdstrike.com',
+            'kaspersky.com', 'securelist.com', 'sophos.com',
+            'bleepingcomputer.com', 'darkreading.com',
+            'threatpost.com', 'securityweek.com', 'theregister.com',
+            'sentinelone.com', 'paloaltonetworks.com', 'unit42',
+            'eset.com', 'malwarebytes.com', 'trendmicro.com',
+            'bitdefender.com', 'avast.com', 'symantec.com',
+            'mcafee.com', 'f-secure.com', 'drweb.com',
+            'gdatasoftware.com', 'humansecurity.com', 'elastic.co',
         ]
         
         for indicator in benign_indicators:
             if indicator in url_lower:
                 return True
+        
+        # Check for common TLDs that are usually benign when combined with www
+        if 'www.' in url_lower:
+            benign_tld_with_www = [
+                '.com/', '.org/', '.net/', '.io/',
+            ]
+            for tld in benign_tld_with_www:
+                if tld in url_lower and 'www.' in url_lower:
+                    # Additional check: if it has /blog/ or /news/, it's benign
+                    if any(x in url_lower for x in ['/blog/', '/news/', '/article/', '/post/']):
+                        return True
         
         return False
     
