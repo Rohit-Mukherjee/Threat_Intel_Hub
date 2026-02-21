@@ -438,12 +438,13 @@ with col3:
 st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
 
 # Tabs for different views
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📰 Latest Intelligence",
     "🎯 IOCs",
     "👥 APT Intelligence",
     "👤 Threat Actors",
-    "📊 Analytics"
+    "📊 Analytics",
+    "⚙️ Settings"
 ])
 
 # Tab 1: Latest Intelligence
@@ -1144,6 +1145,224 @@ with tab5:
         top_actors = sorted(actor_counts.items(), key=lambda x: x[1], reverse=True)[:10]
         actor_df = pd.DataFrame(top_actors, columns=['Actor', 'Mentions'])
         st.bar_chart(actor_df.set_index('Actor'))
+
+# Tab 6: Settings
+with tab6:
+    st.markdown("<div class='section-header'>⚙️ Settings & Configuration</div>", unsafe_allow_html=True)
+
+    # Initialize config manager
+    try:
+        from config_manager import get_config
+        config = get_config()
+    except Exception as e:
+        st.error(f"Error loading config: {e}")
+        config = None
+
+    if config:
+        # API Keys Section
+        st.markdown("### 🔑 API Keys")
+        st.markdown("*Configure API keys for IOC enrichment and external lookups*")
+
+        api_cols = st.columns(2)
+
+        with api_cols[0]:
+            vt_key = st.text_input(
+                "🔍 VirusTotal API Key",
+                value=config.get_api_key('virustotal') or '',
+                type='password',
+                help="Get your free API key from virustotal.com",
+                key="vt_key_input"
+            )
+            if st.button("Save VirusTotal Key", key="save_vt"):
+                if vt_key:
+                    config.set_api_key('virustotal', vt_key)
+                    st.success("✓ VirusTotal API key saved!")
+                else:
+                    st.info("API key cleared")
+
+        with api_cols[1]:
+            shodan_key = st.text_input(
+                "🌐 Shodan API Key",
+                value=config.get_api_key('shodan') or '',
+                type='password',
+                help="Get your free API key from shodan.io",
+                key="shodan_key_input"
+            )
+            if st.button("Save Shodan Key", key="save_shodan"):
+                if shodan_key:
+                    config.set_api_key('shodan', shodan_key)
+                    st.success("✓ Shodan API key saved!")
+                else:
+                    st.info("API key cleared")
+
+        # API Key Status
+        st.markdown("#### API Key Status")
+        api_status = config.get_all_api_keys()
+        status_cols = st.columns(4)
+
+        services = ['virustotal', 'shodan', 'abusech', 'censys']
+        icons = ['🔍', '🌐', '🦠', '🔎']
+
+        for i, (service, icon) in enumerate(zip(services, icons)):
+            with status_cols[i % 4]:
+                status = "✅ Configured" if api_status.get(service) else "❌ Not set"
+                st.metric(f"{icon} {service.title()}", status)
+
+        st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+
+        # Notifications Section
+        st.markdown("### 🔔 Notifications")
+        st.markdown("*Get alerts for critical threats and new IOCs*")
+
+        notif_cols = st.columns(2)
+
+        with notif_cols[0]:
+            st.markdown("#### Slack Notifications")
+            slack_enabled = config.is_notification_enabled('slack')
+            slack_webhook = config.get('notifications.slack.webhook_url', '')
+
+            new_slack_enabled = st.checkbox(
+                "Enable Slack Notifications",
+                value=slack_enabled,
+                key="slack_enable"
+            )
+            new_slack_webhook = st.text_input(
+                "Slack Webhook URL",
+                value=slack_webhook,
+                type='password',
+                key="slack_webhook_input"
+            )
+
+            if st.button("Save Slack Settings", key="save_slack"):
+                config.set('notifications.slack.enabled', new_slack_enabled)
+                config.set('notifications.slack.webhook_url', new_slack_webhook)
+                if new_slack_enabled and new_slack_webhook:
+                    st.success("✓ Slack notifications enabled!")
+                else:
+                    st.info("Slack notifications disabled")
+
+        with notif_cols[1]:
+            st.markdown("#### Email Notifications")
+            email_enabled = config.is_notification_enabled('email')
+            email_config = config.get_notification_config('email')
+
+            new_email_enabled = st.checkbox(
+                "Enable Email Notifications",
+                value=email_enabled,
+                key="email_enable"
+            )
+            st.text_input(
+                "SMTP Server",
+                value=email_config.get('smtp_server', ''),
+                key="email_smtp"
+            )
+            st.text_input(
+                "SMTP Port",
+                value=str(email_config.get('smtp_port', 587)),
+                key="email_port"
+            )
+            st.text_input(
+                "From Address",
+                value=email_config.get('from_address', ''),
+                key="email_from"
+            )
+            st.text_input(
+                "To Addresses (comma-separated)",
+                value=', '.join(email_config.get('to_addresses', [])),
+                key="email_to"
+            )
+
+            if st.button("Save Email Settings", key="save_email"):
+                config.set('notifications.email.enabled', new_email_enabled)
+                st.success("✓ Email settings saved! (Configure password in config.json)")
+
+        st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+
+        # Collection Settings
+        st.markdown("### 🔄 Collection Settings")
+
+        collection_config = config.get_collection_config()
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            days_back = st.number_input(
+                "Days to Collect",
+                min_value=1,
+                max_value=30,
+                value=collection_config.get('days_back', 7),
+                key="days_back"
+            )
+
+        with col2:
+            min_confidence = st.selectbox(
+                "Minimum Confidence",
+                options=['Low', 'Medium', 'High'],
+                index=['Low', 'Medium', 'High'].index(collection_config.get('min_confidence', 'Low')),
+                key="min_confidence"
+            )
+
+        with col3:
+            auto_refresh = st.number_input(
+                "Auto-refresh Hours",
+                min_value=1,
+                max_value=24,
+                value=collection_config.get('auto_refresh_hours', 6),
+                key="auto_refresh"
+            )
+
+        if st.button("Save Collection Settings", key="save_collection"):
+            config.set('collection.days_back', days_back)
+            config.set('collection.min_confidence', min_confidence)
+            config.set('collection.auto_refresh_hours', auto_refresh)
+            st.success("✓ Collection settings saved!")
+
+        st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+
+        # Dashboard Settings
+        st.markdown("### 📊 Dashboard Settings")
+
+        dashboard_config = config.get_dashboard_config()
+
+        dcol1, dcol2 = st.columns(2)
+
+        with dcol1:
+            items_per_page = st.number_input(
+                "Items Per Page",
+                min_value=10,
+                max_value=200,
+                value=dashboard_config.get('items_per_page', 50),
+                key="items_per_page"
+            )
+
+        with dcol2:
+            theme = st.selectbox(
+                "Theme",
+                options=['dark', 'light'],
+                index=['dark', 'light'].index(dashboard_config.get('theme', 'dark')),
+                key="theme"
+            )
+
+        if st.button("Save Dashboard Settings", key="save_dashboard"):
+            config.set('dashboard.items_per_page', items_per_page)
+            config.set('dashboard.theme', theme)
+            st.success("✓ Dashboard settings saved! (Theme change requires refresh)")
+
+        st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+
+        # Danger Zone
+        st.markdown("### ⚠️ Danger Zone")
+
+        if st.button("🗑️ Reset All Settings to Defaults", type="secondary"):
+            config.reset_to_defaults()
+            st.success("✓ All settings reset to defaults!")
+            st.rerun()
+
+        if st.button("🧹 Clean Up Duplicate IOCs", type="secondary"):
+            from database import ThreatIntelDB
+            db_instance = ThreatIntelDB("data/threat_intel.db")
+            deleted = db_instance.cleanup_duplicates()
+            st.success(f"✓ Cleaned up {deleted} duplicate IOCs!")
 
 # Footer
 st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
