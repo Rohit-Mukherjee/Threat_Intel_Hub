@@ -881,6 +881,109 @@ with tab3:
             st.subheader(f"📰 Intelligence for {selected_apt}")
             apt_items = apt_intel.get(selected_apt, [])
 
+            # Extract related IOCs, malware, and techniques for this APT
+            apt_iocs = []
+            apt_malware = set()
+            apt_techniques = set()
+            apt_campaigns = set()
+            
+            for item in apt_items:
+                # Get IOCs related to this intel
+                item_iocs = db.get_iocs(limit=100)
+                for ioc in item_iocs:
+                    if ioc.get('source_url') == item.get('url'):
+                        apt_iocs.append(ioc)
+                # Collect malware families
+                if item.get('malware_families'):
+                    for m in item['malware_families']:
+                        apt_malware.add(m)
+                # Collect techniques
+                if item.get('techniques'):
+                    for t in item['techniques']:
+                        apt_techniques.add(t)
+                # Collect campaign names
+                if item.get('campaign_name'):
+                    apt_campaigns.add(item['campaign_name'])
+
+            # Additional APT insights section
+            st.markdown("### 🔍 APT Insights")
+            
+            insight_cols = st.columns(4)
+            with insight_cols[0]:
+                st.metric("Related IOCs", len(apt_iocs))
+            with insight_cols[1]:
+                st.metric("Malware Families", len(apt_malware))
+            with insight_cols[2]:
+                st.metric("Techniques Used", len(apt_techniques))
+            with insight_cols[3]:
+                st.metric("Campaigns", len(apt_campaigns))
+
+            # Show malware, techniques, campaigns if available
+            if apt_malware or apt_techniques or apt_campaigns:
+                st.markdown("")
+                meta_cols = st.columns(3)
+                
+                with meta_cols[0]:
+                    if apt_malware:
+                        st.markdown("**🦠 Malware:**")
+                        for malware in list(apt_malware)[:5]:
+                            st.markdown(f"`{malware}`")
+                
+                with meta_cols[1]:
+                    if apt_campaigns:
+                        st.markdown("**🎯 Campaigns:**")
+                        for campaign in list(apt_campaigns)[:5]:
+                            st.markdown(f"`{campaign}`")
+                
+                with meta_cols[2]:
+                    if apt_techniques:
+                        st.markdown("**🎭 Techniques:**")
+                        for tech in list(apt_techniques)[:5]:
+                            st.markdown(f"`{tech}`")
+
+            # Related IOCs section
+            if apt_iocs:
+                st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+                st.markdown("### 🎯 Related IOCs")
+                
+                ioc_type_counts = {}
+                for ioc in apt_iocs:
+                    ioc_type = ioc.get('ioc_type', 'unknown')
+                    ioc_type_counts[ioc_type] = ioc_type_counts.get(ioc_type, 0) + 1
+                
+                type_cols = st.columns(len(ioc_type_counts) if ioc_type_counts else 1)
+                for i, (ioc_type, count) in enumerate(ioc_type_counts.items()):
+                    with type_cols[i % len(type_cols)]:
+                        st.metric(ioc_type.replace('_', ' ').title(), count)
+                
+                # Show IOC table
+                ioc_display = []
+                for ioc in apt_iocs[:20]:
+                    ioc_display.append({
+                        "Value": ioc['value'][:35] + "..." if len(ioc['value']) > 35 else ioc['value'],
+                        "Type": ioc['ioc_type'],
+                        "Confidence": ioc['confidence'],
+                    })
+                if ioc_display:
+                    st.dataframe(pd.DataFrame(ioc_display), use_container_width=True, hide_index=True)
+
+            # External Intelligence Links
+            st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+            st.markdown("### 🔗 External Intelligence")
+            
+            ext_cols = st.columns(4)
+            with ext_cols[0]:
+                st.link_button("🔍 MITRE ATT&CK", f"https://attack.mitre.org/groups/")
+            with ext_cols[1]:
+                st.link_button("🦠 MalwareBazaar", f"https://bazaar.abuse.ch/browse/?search={selected_apt.replace(' ', '+')}")
+            with ext_cols[2]:
+                st.link_button("🌐 VirusTotal", f"https://www.virustotal.com/gui/search/{selected_apt.replace(' ', '+')}")
+            with ext_cols[3]:
+                st.link_button("📰 Google Search", f"https://www.google.com/search?q={selected_apt.replace(' ', '+')}+APT")
+
+            st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+            
+            # Intelligence items
             for item in apt_items[:20]:
                 severity = item.get('severity', 'Low')
                 sev_icon = {"Critical": "🔴", "High": "🟠", "Medium": "🟡", "Low": "🟢"}.get(severity, "⚪")
@@ -908,36 +1011,77 @@ with tab4:
     if not threat_actors:
         st.info("📭 No threat actors tracked yet.")
     else:
+        # Threat Actor Summary
+        st.markdown("### 📊 Overview")
+        summary_cols = st.columns(3)
+        with summary_cols[0]:
+            st.metric("Total Groups", len(threat_actors))
+        with summary_cols[1]:
+            origins = set(a.get('origin', 'Unknown') for a in threat_actors if a.get('origin'))
+            st.metric("Countries Represented", len(origins))
+        with summary_cols[2]:
+            all_tools = set()
+            for a in threat_actors:
+                if a.get('tools'):
+                    all_tools.update(a.get('tools', []))
+            st.metric("Unique Tools", len(all_tools))
+        
+        st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+
+        # Threat Actor Cards
         for actor in threat_actors:
-            st.markdown(f"""
-            <div class='apt-card'>
-                <h3 style='margin-top: 0; color: #c77dff;'>{actor.get('name', 'Unknown')}</h3>
-            </div>
-            """, unsafe_allow_html=True)
-            col1, col2 = st.columns(2)
-            with col1:
-                st.markdown("**📍 Origin:**")
-                st.markdown(actor.get('origin', 'Unknown'))
-                st.markdown("**💰 Motivation:**")
-                st.markdown(actor.get('motivation', 'Unknown'))
-                if actor.get('aliases'):
-                    st.markdown("**🎭 Aliases:**")
-                    for alias in actor.get('aliases', []):
-                        st.markdown(f"- {alias}")
-            with col2:
-                if actor.get('targets'):
-                    st.markdown("**🎯 Target Sectors:**")
-                    for target in actor.get('targets', []):
-                        st.markdown(f"`{target}`")
-                if actor.get('tools'):
-                    st.markdown("**🛠️ Known Tools:**")
-                    for tool in actor.get('tools', [])[:5]:
-                        st.markdown(f"- {tool}")
-                if actor.get('techniques'):
-                    st.markdown("**🎭 Common Techniques:**")
-                    for tech in actor.get('techniques', [])[:5]:
-                        st.markdown(f"`{tech}`")
-            st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+            with st.expander(f"### {actor.get('name', 'Unknown')} - {actor.get('origin', 'Unknown')}", expanded=False):
+                st.markdown(f"""
+                <div class='apt-card'>
+                    <h4 style='margin-top: 0; color: #c77dff;'>{actor.get('name', 'Unknown')}</h4>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                col1, col2, col3 = st.columns(3)
+                
+                with col1:
+                    st.markdown("**📍 Origin:**")
+                    st.markdown(actor.get('origin', 'Unknown'))
+                    st.markdown("**💰 Motivation:**")
+                    st.markdown(actor.get('motivation', 'Unknown'))
+                    if actor.get('aliases'):
+                        st.markdown("**🎭 Aliases:**")
+                        for alias in actor.get('aliases', []):
+                            st.markdown(f"`{alias}`")
+                
+                with col2:
+                    if actor.get('targets'):
+                        st.markdown("**🎯 Target Sectors:**")
+                        for target in actor.get('targets', []):
+                            st.markdown(f"`{target}`")
+                    if actor.get('tools'):
+                        st.markdown("**🛠️ Known Tools:**")
+                        for tool in actor.get('tools', [])[:8]:
+                            st.markdown(f"- {tool}")
+                
+                with col3:
+                    if actor.get('techniques'):
+                        st.markdown("**🎭 MITRE ATT&CK:**")
+                        for tech in actor.get('techniques', [])[:10]:
+                            st.markdown(f"`{tech}`")
+                
+                # External Links
+                st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
+                st.markdown("**🔗 External Intelligence:**")
+                
+                actor_name = actor.get('name', '').replace(' ', '+')
+                link_cols = st.columns(4)
+                
+                with link_cols[0]:
+                    st.link_button("🔍 MITRE ATT&CK", f"https://attack.mitre.org/groups/?search={actor_name}")
+                with link_cols[1]:
+                    st.link_button("🦠 MalwareBazaar", f"https://bazaar.abuse.ch/browse/?search={actor_name}")
+                with link_cols[2]:
+                    st.link_button("🌐 VirusTotal", f"https://www.virustotal.com/gui/search/{actor_name}")
+                with link_cols[3]:
+                    st.link_button("📰 Google Search", f"https://www.google.com/search?q={actor_name}+APT+threat+actor")
+                
+                st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
 
 # Tab 5: Analytics
 with tab5:
