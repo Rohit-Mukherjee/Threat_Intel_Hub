@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  threat-intel-hub:
+    build: .
+    container_name: threat-intel-hub
+    ports:
+      - "8501:8501"
+    volumes:
+      # Persist data directory
+      - ./data:/app/data
+      - ./logs:/app/logs
+      # Optional: mount config for API keys
+      - ./data/config.json:/app/data/config.json:ro
+    environment:
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - STREAMLIT_SERVER_PORT=8501
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8501')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Optional: Aggregator service (runs on schedule)
+  aggregator:
+    build: .
+    container_name: threat-intel-aggregator
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - COLLECTION_DAYS_BACK=7
+    command: python aggregator.py
+    depends_on:
+      - threat-intel-hub
+    restart: "no"
