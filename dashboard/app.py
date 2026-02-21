@@ -58,6 +58,21 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
+    /* Ensure sidebar is always visible */
+    [data-testid="stSidebar"] {
+        display: block !important;
+        visibility: visible !important;
+        background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+        border-right: 1px solid var(--border-color);
+    }
+    [data-testid="stSidebarContent"] {
+        display: block !important;
+        visibility: visible !important;
+    }
+    .stSidebar > div {
+        display: block !important;
+    }
+
     /* Custom scrollbar */
     ::-webkit-scrollbar {
         width: 8px;
@@ -248,12 +263,6 @@ st.markdown("""
     }
     .dataframe tr:hover td {
         background: var(--bg-card-hover);
-    }
-
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
-        border-right: 1px solid var(--border-color);
     }
 
     /* Alert boxes */
