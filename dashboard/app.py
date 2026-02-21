@@ -435,11 +435,10 @@ with col4:
 st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
 
 # Tabs for different views
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📰 Latest Intelligence",
     "🎯 IOCs",
     "👥 APT Intelligence",
-    "⛓️ Attack Chains",
     "👤 Threat Actors",
     "📊 Analytics"
 ])
@@ -467,10 +466,12 @@ with tab1:
             continue
         if search_query:
             query_lower = search_query.lower()
+            threat_actors = item.get('threat_actors') or []
+            techniques = item.get('techniques') or []
             if not (query_lower in item.get('title', '').lower() or
                     query_lower in item.get('summary', '').lower() or
-                    query_lower in ' '.join(item.get('threat_actors', [])).lower() or
-                    query_lower in ' '.join(item.get('techniques', [])).lower()):
+                    query_lower in ' '.join(threat_actors).lower() or
+                    query_lower in ' '.join(techniques).lower()):
                 continue
         filtered_items.append(item)
 
@@ -898,50 +899,8 @@ with tab3:
                     st.markdown("**MITRE ATT&CK:** " + " ".join([f"`{t}`" for t in techniques[:5]]))
                 st.markdown("---")
 
-# Tab 4: Attack Chains
+# Tab 4: Threat Actors
 with tab4:
-    st.markdown("<div class='section-header'>⛓️ Attack Chain Analysis</div>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #a0aec0; margin-bottom: 20px;'>Detailed attack chains mapped to MITRE ATT&CK kill chain</p>", unsafe_allow_html=True)
-
-    attack_chains = db.get_attack_chains(limit=20)
-
-    if not attack_chains:
-        st.info("📭 No attack chains documented yet.")
-    else:
-        for chain in attack_chains:
-            with st.expander(f"🎯 {chain.get('campaign_name', 'Unknown Campaign')} - {chain.get('source', 'Unknown')}"):
-                st.markdown(f"**Source:** [{chain.get('source')}]({chain.get('url', '#')})")
-                if chain.get('published_at'):
-                    try:
-                        pub_date = datetime.fromisoformat(chain.get('published_at'))
-                        st.markdown(f"**Published:** {pub_date.strftime('%Y-%m-%d')}")
-                    except:
-                        pass
-                st.markdown("---")
-                st.markdown("### 🔗 Kill Chain Phases")
-                phases = [
-                    ('Initial Access', chain.get('initial_access')),
-                    ('Execution', chain.get('execution')),
-                    ('Persistence', chain.get('persistence')),
-                    ('Defense Evasion', chain.get('defense_evasion')),
-                    ('Lateral Movement', chain.get('lateral_movement')),
-                    ('Command & Control', chain.get('command_control')),
-                    ('Exfiltration', chain.get('exfiltration')),
-                ]
-                for phase_name, phase_data in phases:
-                    if phase_data:
-                        st.markdown(f"**{phase_name}:** {phase_data}")
-                mitre_techniques = chain.get('mitre_techniques', [])
-                if mitre_techniques:
-                    st.markdown("---")
-                    st.markdown("### 🎯 MITRE ATT&CK Techniques")
-                    cols = st.columns(4)
-                    for i, tech in enumerate(mitre_techniques[:12]):
-                        with cols[i % 4]:
-                            st.markdown(f"`{tech}`")
-
-# Tab 5: Threat Actors
-with tab5:
     st.markdown("<div class='section-header'>👤 Tracked Threat Actors</div>", unsafe_allow_html=True)
 
     threat_actors = db.get_threat_actors()
@@ -980,8 +939,8 @@ with tab5:
                         st.markdown(f"`{tech}`")
             st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
 
-# Tab 6: Analytics
-with tab6:
+# Tab 5: Analytics
+with tab5:
     st.markdown("<div class='section-header'>📊 Threat Intelligence Analytics</div>", unsafe_allow_html=True)
 
     stats = db.get_stats()
