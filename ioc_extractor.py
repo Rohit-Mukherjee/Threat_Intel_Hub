@@ -172,13 +172,24 @@ class IOCExtractor:
                     tags: List[str] = None) -> List[IOC]:
         """Extract all IOCs from content."""
         iocs = []
-        
+
         # Extract each IOC type
         for ioc_type, pattern in self.compiled_patterns.items():
             matches = pattern.findall(content)
             for match in matches:
+                value = match.strip()
+                
+                # Skip if value matches the source URL (don't extract blog URLs as IOCs)
+                if source_url and value == source_url:
+                    continue
+                
+                # Skip URLs from security vendor sites
+                if ioc_type == IOCType.URL:
+                    if self._is_benign_url(value):
+                        continue
+                
                 ioc = self._create_ioc(
-                    value=match.strip(),
+                    value=value,
                     ioc_type=ioc_type,
                     source=source,
                     source_url=source_url,
@@ -189,8 +200,40 @@ class IOCExtractor:
                 )
                 if ioc and self._is_valid_ioc(ioc):
                     iocs.append(ioc)
-        
+
         return iocs
+
+    def _is_benign_url(self, url: str) -> bool:
+        """Check if URL is from a benign/security vendor source."""
+        url_lower = url.lower()
+        
+        # Check against security vendor regexes
+        for regex in self.security_vendor_regexes:
+            if regex.match(url):
+                return True
+        
+        # Check against benign URL patterns
+        for regex in self.benign_url_regexes:
+            if regex.match(url):
+                return True
+        
+        # Check for common benign patterns
+        benign_indicators = [
+            '/feed', '/rss', '/rss.xml', '/feed.xml',
+            'feedburner', 'feeds.feedburner.com',
+            'twitter.com/', 'linkedin.com/', 'facebook.com/',
+            'youtube.com/', 'google.com/', 'github.com/',
+            'microsoft.com/', 'windows.com/', 'office.com/',
+            'amazon.com/', 'aws.amazon.com/',
+            'cdn.', 'static.', 'assets.', 'media.',
+            'docs.', 'support.', 'learn.', 'help.',
+        ]
+        
+        for indicator in benign_indicators:
+            if indicator in url_lower:
+                return True
+        
+        return False
     
     def _create_ioc(self, value: str, ioc_type: IOCType, source: str,
                     source_url: str, threat_actors: List[str],
