@@ -16,33 +16,45 @@ A **free, open-source threat intelligence aggregator** with a beautiful dashboar
 
 ## Quick Start
 
-### 1. Install Dependencies
+### Option 1: Automated Setup (Recommended)
+
+**Linux/macOS:**
+```bash
+cd threat_intel_hub
+python3 setup.py          # Creates venv and installs dependencies
+./run_aggregator.sh       # Run the aggregator
+./run_dashboard.sh        # Launch the dashboard
+```
+
+**Windows:**
+```bash
+cd threat_intel_hub
+python setup.py           # Creates venv and installs dependencies
+run_aggregator.bat        # Run the aggregator
+run_dashboard.bat         # Launch the dashboard
+```
+
+### Option 2: Manual Setup
 
 ```bash
 cd threat_intel_hub
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-```
-
-### 2. Run the Aggregator
-
-```bash
 python aggregator.py
+streamlit run dashboard/app.py
 ```
 
-This will:
+The dashboard will open at `http://localhost:8501`
+
+### What the Aggregator Does
+
+When you run the aggregator, it will:
 - Create the SQLite database
 - Collect intelligence from all RSS feeds (last 7 days)
 - Extract IOCs (IPs, domains, URLs, hashes, etc.) from articles
 - Fetch CISA alerts and known exploited vulnerabilities
 - Load threat actor profiles
-
-### 3. Launch the Dashboard
-
-```bash
-streamlit run dashboard/app.py
-```
-
-The dashboard will open at `http://localhost:8501`
 
 ## Dashboard Tabs
 
