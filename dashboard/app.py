@@ -971,22 +971,6 @@ with tab3:
                 if ioc_display:
                     st.dataframe(pd.DataFrame(ioc_display), use_container_width=True, hide_index=True)
 
-            # External Intelligence Links
-            st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
-            st.markdown("### 🔗 External Intelligence")
-            
-            ext_cols = st.columns(4)
-            with ext_cols[0]:
-                st.link_button("🔍 MITRE ATT&CK", f"https://attack.mitre.org/groups/")
-            with ext_cols[1]:
-                st.link_button("🦠 MalwareBazaar", f"https://bazaar.abuse.ch/browse/?search={selected_apt.replace(' ', '+')}")
-            with ext_cols[2]:
-                st.link_button("🌐 VirusTotal", f"https://www.virustotal.com/gui/search/{selected_apt.replace(' ', '+')}")
-            with ext_cols[3]:
-                st.link_button("📰 Google Search", f"https://www.google.com/search?q={selected_apt.replace(' ', '+')}+APT")
-
-            st.markdown("<div class='custom-divider'></div>", unsafe_allow_html=True)
-            
             # Intelligence items
             for item in apt_items[:20]:
                 severity = item.get('severity', 'Low')
