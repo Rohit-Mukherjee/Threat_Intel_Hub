@@ -446,16 +446,6 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📊 Analytics"
 ])
 
-# Auto-switch tabs based on button clicks
-if st.session_state.selected_tab == 1:
-    tab2.select()
-elif st.session_state.selected_tab == 2:
-    tab3.select()
-elif st.session_state.selected_tab == 3:
-    tab4.select()
-elif st.session_state.selected_tab == 4:
-    tab5.select()
-
 # Tab 1: Latest Intelligence
 with tab1:
     st.markdown("<div class='section-header'>📰 Latest Threat Intelligence</div>", unsafe_allow_html=True)
