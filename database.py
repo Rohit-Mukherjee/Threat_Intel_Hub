@@ -523,7 +523,7 @@ class ThreatIntelDB:
             "pattern_type": "stix",
             "valid_from": ioc.get('first_seen', datetime.now().isoformat()),
             "created_by_ref": identity_id,
-            "labels": (ioc.get('tags') or []) + [ioc.get('confidence', 'Unknown')]
+            "labels": (ioc.get('tags') or []) + [ioc.get('confidence') or 'Unknown']
         }
     
     def _export_misp(self, iocs: List[dict]) -> str:
